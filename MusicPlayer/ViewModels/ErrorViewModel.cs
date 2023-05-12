@@ -1,4 +1,4 @@
-namespace MusicPlayer.Models
+namespace MusicPlayer.ViewModels
 {
     public class ErrorViewModel
     {
