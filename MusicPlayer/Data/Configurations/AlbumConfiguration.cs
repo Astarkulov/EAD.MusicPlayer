@@ -11,6 +11,7 @@ public class AlbumConfiguration : IEntityTypeConfiguration<Album>
         builder.HasOne(x => x.Artist)
             .WithMany(x => x.Albums)
             .HasForeignKey(x => x.ArtistId)
+            .IsRequired(false)
             .OnDelete(DeleteBehavior.NoAction);
     }
 }

@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using System.Diagnostics.CodeAnalysis;
+using Microsoft.AspNetCore.Identity;
 using MusicPlayer.Data;
 
 namespace MusicPlayer.Models;
@@ -11,7 +12,7 @@ public class Album : BaseEntity
     /// <summary>
     /// Идентификатор исполнителя
     /// </summary>
-    public long ArtistId { get; set; }
+    public long? ArtistId { get; set; }
 
     /// <summary>
     /// 
@@ -22,6 +23,11 @@ public class Album : BaseEntity
     /// Наименование
     /// </summary>
     public string Name { get; set; }
+    
+    /// <summary>
+    /// Название файла обложки
+    /// </summary>
+    public string? AlbumArtFileName { get; set; }
 
     /// <summary>
     /// Исполнитель

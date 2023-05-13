@@ -2,3 +2,5 @@
 .vs
 MusicPlayer/bin
 MusicPlayer/obj
+MusicPlayer/wwwroot/AlbumArt/*
+MusicPlayer/wwwroot/Tracks/*

@@ -87,6 +87,7 @@ public class Track : BaseEntity
                 var artist = tagLibFile.Tag.FirstPerformer is not null
                     ? unitOfWork
                           .GetRepository<Artist>()
+                          .Include(x => x.Albums)
                           .FirstOrDefault(
                               x => x.Name == tagLibFile.Tag.FirstPerformer && x.UserId == user.Id) ??
                       new Artist
@@ -103,10 +104,29 @@ public class Track : BaseEntity
                           .FirstOrDefault(x => x.Name == tagLibFile.Tag.Album && x.UserId == user.Id)
                       ?? new Album
                       {
-                          Name = tagLibFile.Tag.Album ?? string.Empty
+                          Name = tagLibFile.Tag.Album,
+                          UserId = user.Id
                       }
                     : null;
-                if (album is not null && album.Artist is null) artist?.Albums.Add(album);
+                if (album is not null && album.Artist is null)
+                    artist?.Albums.Add(album);
+                
+                var pictures = tagLibFile.Tag.Pictures;
+
+                if (pictures.Length > 0 && album is not null && album.Id is null)
+                {
+                    var pictureData = pictures[0].Data.Data;
+    
+                    var mimeType = pictures[0].MimeType; 
+                    var extension = mimeType.Split('/').Last();
+                    var picFilePath = Path.Combine("wwwroot", "AlbumArt", album.Name + "." + extension);
+                    album.AlbumArtFileName = album.Name + "." + extension;
+                    if (!System.IO.File.Exists(picFilePath))
+                    {
+                        await using var stream = new FileStream(picFilePath, FileMode.Create);
+                        stream.Write(pictureData, 0, pictureData.Length);
+                    }
+                }
 
                 var newTrack = new Track
                 {
@@ -118,9 +138,18 @@ public class Track : BaseEntity
                     FileName = fileName
                 };
 
-                if (artist?.Id is not null) unitOfWork.GetRepository<Artist>().Update(artist);
-                else await unitOfWork.GetRepository<Artist>().AddAsync(artist);
+                if (artist is not null)
+                {
+                    if (artist.Id is not null) unitOfWork.GetRepository<Artist>().Update(artist);
+                    else await unitOfWork.GetRepository<Artist>().AddAsync(artist);
+                }
 
+                if (album is not null)
+                {
+                    if (album.Id is not null) unitOfWork.GetRepository<Album>().Update(album);
+                    else await unitOfWork.GetRepository<Album>().AddAsync(album);
+                }
+                
                 await unitOfWork.GetRepository<Track>().AddAsync(newTrack);
                 await unitOfWork.SaveChanges();
 

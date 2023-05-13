@@ -19,6 +19,7 @@
   <ItemGroup>
     <Folder Include="Data\Tracks\" />
     <Folder Include="Dto\" />
+    <Folder Include="wwwroot\AlbumArt\" />
   </ItemGroup>
 
 </Project>

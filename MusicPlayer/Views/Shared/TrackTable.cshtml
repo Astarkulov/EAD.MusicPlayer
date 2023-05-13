@@ -1,0 +1,32 @@
+﻿@model Track[]
+
+<table class="table">
+    <thead>
+    <tr>
+        <th scope="col">Название</th>
+        <th scope="col">Трек</th>
+        <th scope="col">Исполнитель</th>
+        <th scope="col">Альбом</th>
+        <th scope="col">Плейлист</th>
+        <th scope="col"></th>
+    </tr>
+    </thead>
+    <tbody>
+    @foreach (var track in Model)
+    {
+        <tr>
+            <td>@track.Name</td>
+            <td><audio controls><source src="@Url.Content("~/Tracks/" + track.FileName)" type="audio/mpeg"></audio></td>
+            <td>@track.Artist?.Name</td>
+            <td>@track.Album?.Name</td>
+            <td>@track.Playlist?.Name</td>
+            <td>
+                <form asp-controller="Track" asp-action="DeleteTrack" method="post">
+                    <input type="hidden" name="trackId" value="@track.Id" />
+                    <button type="submit">Удалить</button>
+                </form>
+            </td>
+        </tr>
+    }
+    </tbody>
+</table>
