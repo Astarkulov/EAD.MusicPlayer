@@ -1,11 +1,11 @@
 ﻿using System.Linq.Expressions;
-using MusicPlayer.Models;
+using Microsoft.EntityFrameworkCore.Query;
 
 namespace MusicPlayer.Data;
 
 public interface IGenericRepository<TEntity> where TEntity : class, IBaseEntity
 {
-    IQueryable<TEntity> Where(Expression<Func<TEntity, bool>> expression = null);
+    IQueryable<TEntity> Where(Expression<Func<TEntity, bool>>? expression = null);
 
     void Add(TEntity entity);
 
@@ -15,9 +15,9 @@ public interface IGenericRepository<TEntity> where TEntity : class, IBaseEntity
 
     IQueryable<TEntity> GetAll();
 
-    Task<TEntity> FirstOrDefaultAsync();
+    Task<TEntity?> FirstOrDefaultAsync();
 
-    Task<TEntity> FirstOrDefaultAsync(Expression<Func<TEntity, bool>> expression);
+    TEntity? FirstOrDefault(Expression<Func<TEntity, bool>> expression);
 
     void AddRange(IEnumerable<TEntity> entities);
 
@@ -27,5 +27,7 @@ public interface IGenericRepository<TEntity> where TEntity : class, IBaseEntity
 
     Task AddRangeAsync(IEnumerable<TEntity> entities);
 
-    bool Any(Expression<Func<TEntity, bool>> expression = null);
+    bool Any(Expression<Func<TEntity, bool>>? expression = null);
+
+    IIncludableQueryable<TEntity, TProperty> Include<TProperty>(Expression<Func<TEntity, TProperty>> expression);
 }

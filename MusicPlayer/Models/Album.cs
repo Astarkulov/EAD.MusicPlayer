@@ -1,4 +1,5 @@
-﻿using MusicPlayer.Data;
+﻿using Microsoft.AspNetCore.Identity;
+using MusicPlayer.Data;
 
 namespace MusicPlayer.Models;
 
@@ -11,6 +12,11 @@ public class Album : BaseEntity
     /// Идентификатор исполнителя
     /// </summary>
     public long ArtistId { get; set; }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public string UserId { get; set; }
 
     /// <summary>
     /// Наименование
@@ -26,4 +32,9 @@ public class Album : BaseEntity
     /// Композиции
     /// </summary>
     public virtual IList<Track> Tracks { get; set; }
+    
+    /// <summary>
+    /// Пользователь 
+    /// </summary>
+    public virtual IdentityUser User { get; set; }
 }

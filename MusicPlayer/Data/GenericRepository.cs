@@ -1,6 +1,6 @@
 ﻿using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore;
-using MusicPlayer.Models;
+using Microsoft.EntityFrameworkCore.Query;
 
 namespace MusicPlayer.Data;
 
@@ -13,7 +13,7 @@ public class GenericRepository<TEntity> : IGenericRepository<TEntity> where TEnt
         _dbSet = dbContext.Set<TEntity>();
     }
 
-    public IQueryable<TEntity> Where(Expression<Func<TEntity, bool>> expression)
+    public IQueryable<TEntity> Where(Expression<Func<TEntity, bool>>? expression)
     {
         return _dbSet.Where(expression).AsQueryable();
     }
@@ -38,14 +38,14 @@ public class GenericRepository<TEntity> : IGenericRepository<TEntity> where TEnt
         return _dbSet.AsQueryable();
     }
 
-    public async Task<TEntity> FirstOrDefaultAsync()
+    public async Task<TEntity?> FirstOrDefaultAsync()
     {
         return await _dbSet.FirstOrDefaultAsync();
     }
 
-    public async Task<TEntity> FirstOrDefaultAsync(Expression<Func<TEntity, bool>> expression)
+    public TEntity? FirstOrDefault(Expression<Func<TEntity, bool>> expression)
     {
-        return await _dbSet.FirstOrDefaultAsync(expression);
+        return _dbSet.FirstOrDefault(expression);
     }
 
     public void AddRange(IEnumerable<TEntity> entities)
@@ -68,5 +68,10 @@ public class GenericRepository<TEntity> : IGenericRepository<TEntity> where TEnt
         await _dbSet.AddRangeAsync(entities);
     }
 
-    public bool Any(Expression<Func<TEntity, bool>> expression = null) => _dbSet.Any(expression);
+    public bool Any(Expression<Func<TEntity, bool>>? expression = null) => expression != null && _dbSet.Any(expression);
+    
+    public IIncludableQueryable<TEntity, TProperty> Include<TProperty>(Expression<Func<TEntity, TProperty>> expression)
+    {
+        return _dbSet.Include(expression);
+    }
 }
