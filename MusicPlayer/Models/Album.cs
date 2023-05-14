@@ -15,11 +15,6 @@ public class Album : BaseEntity
     public long? ArtistId { get; set; }
 
     /// <summary>
-    /// 
-    /// </summary>
-    public string UserId { get; set; }
-
-    /// <summary>
     /// Наименование
     /// </summary>
     public string Name { get; set; }
@@ -38,9 +33,4 @@ public class Album : BaseEntity
     /// Композиции
     /// </summary>
     public virtual IList<Track> Tracks { get; set; }
-    
-    /// <summary>
-    /// Пользователь 
-    /// </summary>
-    public virtual IdentityUser User { get; set; }
 }

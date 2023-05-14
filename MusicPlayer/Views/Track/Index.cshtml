@@ -4,15 +4,19 @@
 @model Track[]
 
 <div class="text-center">
-    <h1 class="display-4">Мои треки</h1>
+    <h1 class="display-4">Треки</h1>
 </div>
 
-<h2>Загрузить новый трек</h2>
-<form asp-controller="Track" method="post" asp-action="AddTrack" enctype="multipart/form-data">
-    <input class="btn btn-dark" type="file" name="file" id="file">
-    <input class="btn btn-primary" type="submit" value="Загрузить">
-</form>
-<br>
+@if (ViewBag.IsAdmin)
+{
+    <h2>Загрузить новый трек</h2>
+    <form asp-controller="Track" method="post" asp-action="AddTrack" enctype="multipart/form-data">
+        <input class="btn btn-dark" type="file" name="file" id="file">
+        <input class="btn btn-primary" type="submit" value="Загрузить">
+    </form>
+    <br>
+}
+
 
 <form asp-controller="Track" method="get" asp-action="GetFilteredTracks" enctype="multipart/form-data">
     <div class="form-group">
@@ -31,8 +35,11 @@
         <th scope="col">Исполнитель</th>
         <th scope="col">Альбом</th>
         <th scope="col">Жанры</th>
-        <th scope="col"></th>
-        <th scope="col"></th>
+         @if (ViewBag.IsAdmin)
+         {
+             <th scope="col"></th>
+         }
+         <th scope="col"></th>
     </tr>
     </thead>
     <tbody>
@@ -48,12 +55,15 @@
             <td>@track.Artist?.Name</td>
             <td>@track.Album?.Name</td>
             <td>@track.Genres</td>
-            <td>
-                <form asp-controller="Track" asp-action="DeleteTrack" method="post">
-                    <input type="hidden" name="trackId" value="@track.Id"/>
-                    <button class="btn btn-danger" type="submit">Удалить</button>
-                </form>
-            </td>
+            @if (ViewBag.IsAdmin)
+            {
+                <td>
+                    <form asp-controller="Track" asp-action="DeleteTrack" method="post">
+                        <input type="hidden" name="trackId" value="@track.Id"/>
+                        <button class="btn btn-danger" type="submit">Удалить</button>
+                    </form>
+                </td>
+            }
             <td>
                 <button type="button" class="btn btn-primary add-to-playlist-button"
                         data-track-id="@track.Id" id="addToPlaylistModalBtn">

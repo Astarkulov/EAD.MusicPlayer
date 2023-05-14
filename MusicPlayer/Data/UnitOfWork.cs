@@ -1,4 +1,6 @@
 ﻿using System.Collections.Concurrent;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using MusicPlayer.Models;
 
 namespace MusicPlayer.Data;
@@ -22,6 +24,13 @@ public class UnitOfWork : IUnitOfWork
         repository = new GenericRepository<TEntity>(_dbContext);
         _repsDictionary.TryAdd(typeof(TEntity), repository);
         return (IGenericRepository<TEntity>)repository;
+    }
+
+    public async Task<bool> IsAdminUser(IdentityUser user)
+    {
+        var adminRoleId = _dbContext.Set<IdentityRole>().Single(x => x.Name == "Админ").Id;
+        return await _dbContext.Set<IdentityUserRole<string>>()
+            .AnyAsync(x => x.RoleId == adminRoleId && x.UserId == user.Id);
     }
 
     public async Task SaveChanges()

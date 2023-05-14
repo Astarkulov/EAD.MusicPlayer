@@ -9,11 +9,6 @@ namespace MusicPlayer.Models;
 public class Artist : BaseEntity
 {
     /// <summary>
-    /// Идентификатор пользователя
-    /// </summary>
-    public string UserId { get; set; }
-    
-    /// <summary>
     /// ФИО
     /// </summary>
     public string Name { get; set; }
@@ -32,9 +27,4 @@ public class Artist : BaseEntity
     /// Альбомы
     /// </summary>
     public virtual IList<Album> Albums { get; set; }
-    
-    /// <summary>
-    /// Пользователь
-    /// </summary>
-    public IdentityUser User { get; set; }
 }

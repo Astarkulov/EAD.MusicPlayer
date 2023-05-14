@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using MusicPlayer.Data;
 using MusicPlayer.Services.Interfaces;
 
 namespace MusicPlayer.Controllers;
@@ -19,16 +18,14 @@ public class ArtistController : Controller
 
     public async Task<IActionResult> Index()
     {
-        var user = await _userManager.GetUserAsync(User);
-        var albums = await _artistService.GetArtists(user);
+        var albums = await _artistService.GetArtists();
 
         return View(albums);
     }
 
     public async Task<IActionResult> OpenArtist(long artistId)
     {
-        var user = await _userManager.GetUserAsync(User);
-        var artist = await _artistService.GetArtistById(artistId, user);
+        var artist = await _artistService.GetArtistById(artistId);
 
         if (artist is null) return View();
 

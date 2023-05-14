@@ -18,16 +18,14 @@ public class AlbumController : Controller
 
     public async Task<IActionResult> Index()
     {
-        var user = await _userManager.GetUserAsync(User);
-        var albums = await _albumService.GetAlbums(user);
+        var albums = await _albumService.GetAlbums();
 
         return View(albums);
     }
 
     public async Task<IActionResult> OpenTracks(long albumId)
     {
-        var user = await _userManager.GetUserAsync(User);
-        var album = await _albumService.GetAlbumById(albumId, user);
+        var album = await _albumService.GetAlbumById(albumId);
 
         if (album is null) return View();
 

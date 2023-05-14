@@ -12,15 +12,29 @@ public static class SeedData
         // Применяем все миграции, которых еще нет в базе данных
         context.Database.Migrate();
         
-        FillFirstUser(context);
+        FillRoles(context);
+        FillAdminUser(context);
+    }
+    
+    private static void FillRoles(DbContext dbContext)
+    {
+        if (dbContext.Set<IdentityRole>().Any()) return;
+        dbContext.Set<IdentityRole>().AddRange(new IdentityRole
+        {
+            Name = "Админ"
+        }, new IdentityRole
+        {
+            Name = "Холоп"
+        });
+        dbContext.SaveChanges();
     }
 
-    private static void FillFirstUser(DbContext dbContext)
+    private static void FillAdminUser(DbContext dbContext)
     {
         if (dbContext.Set<IdentityUser>().Any()) return;
         dbContext.Set<IdentityUser>().Add(new IdentityUser
         {
-            Id = Guid.NewGuid().ToString(),
+            Id = "49ca44b1-12e0-4e78-a1e8-56532a20dcf1",
             UserName = "astarkulov.aktan@gmail.com",
             NormalizedUserName = "ASTARKULOV.AKTAN@GMAIL.COM",
             Email = "astarkulov.aktan@gmail.com",
@@ -30,6 +44,12 @@ public static class SeedData
             SecurityStamp = "QBMZ3SJVWTETDHP2WP6LWFBIA4VNLYCG",
             ConcurrencyStamp = "5f09a263-490f-4998-bb5a-2e9ccda3cf5f",
             LockoutEnabled = true
+        });
+
+        dbContext.Set<IdentityUserRole<string>>().Add(new IdentityUserRole<string>
+        {
+            UserId = "49ca44b1-12e0-4e78-a1e8-56532a20dcf1",
+            RoleId = dbContext.Set<IdentityRole>().Single(x => x.Name == "Админ").Id
         });
 
         dbContext.SaveChanges();

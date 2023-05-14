@@ -22,11 +22,6 @@ public class Track : BaseEntity
     public long? ArtistId { get; set; }
 
     /// <summary>
-    /// Идентификатор пользователя
-    /// </summary>
-    public string UserId { get; set; }
-
-    /// <summary>
     /// Наименование
     /// </summary>
     [MaxLength(300)]
@@ -56,11 +51,6 @@ public class Track : BaseEntity
     /// Плейлист
     /// </summary>
     public virtual IList<PlaylistTrack> PlaylistTracks { get; set; }
-
-    /// <summary>
-    /// Пользователь
-    /// </summary>
-    public IdentityUser User { get; set; }
 
     /// <summary>
     /// Жанры

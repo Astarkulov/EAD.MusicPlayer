@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using MusicPlayer.Data;
 using MusicPlayer.Models;
 using MusicPlayer.Services.Interfaces;
@@ -14,23 +13,23 @@ public class ArtistService : IArtistService
     {
         _unitOfWork = unitOfWork;
     }
-    
-    public async Task<Artist[]> GetArtists(IdentityUser user)
+
+    public async Task<Artist[]> GetArtists()
     {
         var artists = await _unitOfWork.GetRepository<Artist>()
-            .Where(x => x.UserId == user.Id)
+            .GetAll()
             .ToArrayAsync();
 
         return artists;
     }
 
-    public async Task<Artist> GetArtistById(long artistId, IdentityUser user)
+    public async Task<Artist> GetArtistById(long artistId)
     {
         var artist = _unitOfWork.GetRepository<Artist>()
-            .FirstOrDefault(x => x.UserId == user.Id && x.Id == artistId);
-        
+            .FirstOrDefault(x => x.Id == artistId);
+
         artist.Tracks = await _unitOfWork.GetRepository<Track>()
-            .Where(x => x.ArtistId == artistId && x.UserId == user.Id)
+            .Where(x => x.ArtistId == artistId)
             .Include(x => x.Album)
             .Include(x => x.Artist)
             .ToListAsync();

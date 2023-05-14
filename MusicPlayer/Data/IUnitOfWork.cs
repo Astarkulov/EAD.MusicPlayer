@@ -1,9 +1,11 @@
-﻿using MusicPlayer.Models;
+﻿using Microsoft.AspNetCore.Identity;
+using MusicPlayer.Models;
 
 namespace MusicPlayer.Data;
 
 public interface IUnitOfWork : IDisposable
 {
-    public IGenericRepository<TEntity> GetRepository<TEntity>() where TEntity : class, IBaseEntity;
-    public Task SaveChanges();
+    IGenericRepository<TEntity> GetRepository<TEntity>() where TEntity : class, IBaseEntity;
+    Task SaveChanges();
+    Task<bool> IsAdminUser(IdentityUser user);
 }

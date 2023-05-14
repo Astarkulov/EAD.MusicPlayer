@@ -19,7 +19,8 @@ public class TrackController : Controller
     public async Task<IActionResult> Index()
     {
         var user = await _userManager.GetUserAsync(User);
-        var tracks = await _trackService.GetAllTracks(user);
+        var tracks = await _trackService.GetAllTracks();
+        ViewBag.IsAdmin = await _trackService.IsAdminUser(user);
 
         return View(tracks);
     }
@@ -28,7 +29,8 @@ public class TrackController : Controller
     public async Task<IActionResult> GetFilteredTracks(string searchText)
     {
         var user = await _userManager.GetUserAsync(User);
-        var tracks = await _trackService.GetFilteredTracks(user, searchText);
+        var tracks = await _trackService.GetFilteredTracks(searchText);
+        ViewBag.IsAdmin = await _trackService.IsAdminUser(user);
 
         return View("Index", tracks);
     }
@@ -36,8 +38,8 @@ public class TrackController : Controller
     [HttpPost]
     public async Task<IActionResult> AddTrack(IFormFile file)
     {
-        var user = await _userManager.GetUserAsync(User);
-        ViewBag.Message = await _trackService.AddTrack(file, user);
+        ViewBag.Message = await _trackService.AddTrack(file);
+        if (ViewBag.Message == "Трек успешно записан") return RedirectToAction("Index");
 
         return View();
     }

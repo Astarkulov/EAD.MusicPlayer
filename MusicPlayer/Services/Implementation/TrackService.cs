@@ -18,7 +18,7 @@ public class TrackService : ITrackService
         _unitOfWork = unitOfWork;
     }
 
-    public async Task<string> AddTrack(IFormFile file, IdentityUser user)
+    public async Task<string> AddTrack(IFormFile file)
     {
         string result;
         if (file is { Length: > 0 })
@@ -41,10 +41,9 @@ public class TrackService : ITrackService
                           .GetRepository<Artist>()
                           .Include(x => x.Albums)
                           .FirstOrDefault(
-                              x => x.Name == tagLibFile.Tag.FirstPerformer && x.UserId == user.Id) ??
+                              x => x.Name == tagLibFile.Tag.FirstPerformer) ??
                       new Artist
                       {
-                          UserId = user.Id,
                           Name = tagLibFile.Tag.FirstPerformer,
                           Albums = new List<Album>()
                       }
@@ -53,11 +52,10 @@ public class TrackService : ITrackService
                 var album = tagLibFile.Tag.Album is not null
                     ? _unitOfWork
                           .GetRepository<Album>()
-                          .FirstOrDefault(x => x.Name == tagLibFile.Tag.Album && x.UserId == user.Id)
+                          .FirstOrDefault(x => x.Name == tagLibFile.Tag.Album)
                       ?? new Album
                       {
                           Name = tagLibFile.Tag.Album,
-                          UserId = user.Id
                       }
                     : null;
                 if (album is not null && album.Artist == null)
@@ -76,7 +74,6 @@ public class TrackService : ITrackService
                 var newTrack = new Track
                 {
                     Name = tagLibFile.Tag.Title,
-                    UserId = user.Id,
                     Length = tagLibFile.Properties.Duration.TotalSeconds,
                     Artist = artist,
                     Album = album,
@@ -142,6 +139,25 @@ public class TrackService : ITrackService
             var playlistTracks = await _unitOfWork.GetRepository<PlaylistTrack>()
                 .Where(x => x.TrackId == trackId)
                 .ToArrayAsync();
+            if (track.AlbumId is not null)
+            {
+                var album = _unitOfWork.GetRepository<Album>()
+                    .Include(x => x.Tracks)
+                    .First(x => x.Id == track.AlbumId);
+                
+                if(album.Tracks.Count == 1)
+                    _unitOfWork.GetRepository<Album>().Delete(album);
+            }
+
+            if (track.ArtistId is not null)
+            {
+                var artist = _unitOfWork.GetRepository<Artist>()
+                    .Include(x => x.Tracks)
+                    .First(x => x.Id == track.ArtistId);
+                
+                if(artist.Tracks.Count == 1)
+                    _unitOfWork.GetRepository<Artist>().Delete(artist);
+            }
             _unitOfWork.GetRepository<PlaylistTrack>().DeleteRange(playlistTracks);
             _unitOfWork.GetRepository<Track>().Delete(track);
         }
@@ -168,23 +184,22 @@ public class TrackService : ITrackService
         await _unitOfWork.SaveChanges();
     }
 
-    public async Task<Track[]> GetAllTracks(IdentityUser user)
+    public async Task<Track[]> GetAllTracks()
     {
         var tracks = await _unitOfWork
             .GetRepository<Track>()
             .Include(x => x.Artist)
             .Include(x => x.Album)
-            .Where(x => x.UserId == user.Id)
             .ToArrayAsync();
 
         return tracks;
     }
 
-    public async Task<Track[]> GetFilteredTracks(IdentityUser user, string searchText)
+    public async Task<Track[]> GetFilteredTracks(string searchText)
     {
         var tracks = await _unitOfWork
             .GetRepository<Track>()
-            .Where(x => x.UserId == user.Id &&
+            .Where(x =>
                         x.Artist.Name.Contains(searchText) ||
                         x.Album.Name.Contains(searchText) ||
                         x.Name.Contains(searchText) ||
@@ -194,5 +209,10 @@ public class TrackService : ITrackService
             .ToArrayAsync();
 
         return tracks;
+    }
+
+    public async Task<bool> IsAdminUser(IdentityUser user)
+    {
+        return await _unitOfWork.IsAdminUser(user);
     }
 }

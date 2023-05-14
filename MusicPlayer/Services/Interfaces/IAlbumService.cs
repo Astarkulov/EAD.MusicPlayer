@@ -1,10 +1,9 @@
-﻿using Microsoft.AspNetCore.Identity;
-using MusicPlayer.Models;
+﻿using MusicPlayer.Models;
 
 namespace MusicPlayer.Services.Interfaces;
 
 public interface IAlbumService
 {
-    Task<Album[]> GetAlbums(IdentityUser user);
-    Task<Album> GetAlbumById(long albumId, IdentityUser user);
+    Task<Album[]> GetAlbums();
+    Task<Album> GetAlbumById(long albumId);
 }
