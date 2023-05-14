@@ -1,0 +1,23 @@
+﻿@model MusicPlayer.ViewModels.PlaylistViewModel
+
+@{
+    ViewBag.Title = "Плейлист";
+    Layout = "_Layout";
+}
+<h2>@Model.Name</h2>
+<div class="playlist-tile">
+    <img src="@Url.Content("~/PlaylistArt/" + Model.PlaylistArtFileName)" alt=""/>
+</div>
+<br>
+<form asp-controller="Playlist" asp-action="EditPlaylist" method="post">
+    <input type="hidden" name="playlistId" value="@Model.Id">
+    <input type="submit" class="btn btn-primary" value="Изменить плейлист"/>
+</form>
+<br>
+<form asp-controller="Playlist" asp-action="DeletePlaylist">
+    <input type="hidden" name="playlistId" value="@Model.Id">
+    <input type="submit" class="btn btn-danger" value="Удалить плейлист"/>
+</form>
+<br>
+
+@await Html.PartialAsync("TrackTable", Model.Tracks.ToArray())

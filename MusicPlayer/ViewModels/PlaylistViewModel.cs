@@ -1,13 +1,14 @@
-﻿using Microsoft.AspNetCore.Identity;
-using MusicPlayer.Data;
+﻿using MusicPlayer.Models;
 
-namespace MusicPlayer.Models;
+namespace MusicPlayer.ViewModels;
 
-/// <summary>
-/// Плейлист
-/// </summary>
-public class Playlist : BaseEntity
+public class PlaylistViewModel
 {
+    /// <summary>
+    /// Идентификатор
+    /// </summary>
+    public long? Id { get; set; }
+    
     /// <summary>
     /// Идентификатор пользователя
     /// </summary>
@@ -26,10 +27,5 @@ public class Playlist : BaseEntity
     /// <summary>
     /// Композиции
     /// </summary>
-    public virtual IList<PlaylistTrack> PlaylistTracks { get; set; }
-
-    /// <summary>
-    /// Пользователь
-    /// </summary>
-    public IdentityUser User { get; set; }
+    public virtual Track[] Tracks { get; set; }
 }

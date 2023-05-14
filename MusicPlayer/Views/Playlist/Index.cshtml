@@ -1,0 +1,27 @@
+﻿@model Playlist[]
+
+@{
+    ViewBag.Title = "Мои плейлисты";
+    Layout = "_Layout";
+}
+
+<div class="text-center">
+    <h1 class="display-4">Мои плейлисты</h1>
+</div>
+
+<form asp-controller="Playlist" method="post" asp-action="AddPlaylist" enctype="multipart/form-data">
+    <input class="btn btn-primary" type="submit" value="Добавить плейлист">
+</form>
+
+
+<div class="playlist-grid">
+    @foreach (var playlist in Model)
+    {
+        <div class="playlist-tile">
+            <a href="@Url.Action("OpenPlaylist", new { playlistId = playlist.Id })">
+                <img src="@Url.Content("~/PlaylistArt/" + playlist.PlaylistArtFileName)" alt=""/>
+                <div class="playlist-title">@playlist.Name</div>
+            </a>
+        </div>
+    }
+</div>

@@ -17,9 +17,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Data\Tracks\" />
-    <Folder Include="Dto\" />
     <Folder Include="wwwroot\AlbumArt\" />
+    <Folder Include="wwwroot\PlaylistArt\" />
   </ItemGroup>
 
 </Project>

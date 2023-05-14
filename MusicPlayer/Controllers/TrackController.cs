@@ -1,5 +1,4 @@
 ﻿using System.Diagnostics;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -29,7 +28,6 @@ public class TrackController : Controller
             .GetRepository<Track>()
             .Include(x => x.Artist)
             .Include(x => x.Album)
-            .Include(x => x.Playlist)
             .Where(x => x.UserId == user.Id)
             .ToArrayAsync();
 
@@ -53,9 +51,25 @@ public class TrackController : Controller
         return RedirectToAction("Index");
     }
 
-    [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-    public IActionResult Error()
+    [HttpPost]
+    public async Task<IActionResult> AddTrackToPlaylist(long[] playlistIds, long trackId)
     {
-        return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+        var oldPlaylists = await _unitOfWork.GetRepository<PlaylistTrack>()
+            .Where(x => x.TrackId == trackId)
+            .ToArrayAsync();
+        
+        _unitOfWork.GetRepository<PlaylistTrack>().DeleteRange(oldPlaylists);
+        
+        playlistIds
+            .ToList()
+            .ForEach(x => _unitOfWork.GetRepository<PlaylistTrack>().Add(new PlaylistTrack
+            {
+                PlaylistId = x,
+                TrackId = trackId
+            }));
+
+        await _unitOfWork.SaveChanges();
+
+        return RedirectToAction("Index");
     }
 }

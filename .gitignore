@@ -4,3 +4,4 @@ MusicPlayer/bin
 MusicPlayer/obj
 MusicPlayer/wwwroot/AlbumArt/*
 MusicPlayer/wwwroot/Tracks/*
+MusicPlayer/wwwroot/PlaylistArt/*

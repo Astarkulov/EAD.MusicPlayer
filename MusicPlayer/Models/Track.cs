@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using MusicPlayer.Data;
 using File = TagLib.File;
 
@@ -10,11 +11,6 @@ namespace MusicPlayer.Models;
 /// </summary>
 public class Track : BaseEntity
 {
-    /// <summary>
-    /// Идентификатор плейлиста
-    /// </summary>
-    public long? PlaylistId { get; set; }
-
     /// <summary>
     /// Идентификатор альбома
     /// </summary>
@@ -59,7 +55,7 @@ public class Track : BaseEntity
     /// <summary>
     /// Плейлист
     /// </summary>
-    public virtual Playlist Playlist { get; set; }
+    public virtual IList<PlaylistTrack> PlaylistTracks { get; set; }
 
     /// <summary>
     /// Пользователь
@@ -110,14 +106,14 @@ public class Track : BaseEntity
                     : null;
                 if (album is not null && album.Artist is null)
                     artist?.Albums.Add(album);
-                
+
                 var pictures = tagLibFile.Tag.Pictures;
 
                 if (pictures.Length > 0 && album is not null && album.Id is null)
                 {
                     var pictureData = pictures[0].Data.Data;
-    
-                    var mimeType = pictures[0].MimeType; 
+
+                    var mimeType = pictures[0].MimeType;
                     var extension = mimeType.Split('/').Last();
                     var picFilePath = Path.Combine("wwwroot", "AlbumArt", album.Name + "." + extension);
                     album.AlbumArtFileName = album.Name + "." + extension;
@@ -149,7 +145,7 @@ public class Track : BaseEntity
                     if (album.Id is not null) unitOfWork.GetRepository<Album>().Update(album);
                     else await unitOfWork.GetRepository<Album>().AddAsync(album);
                 }
-                
+
                 await unitOfWork.GetRepository<Track>().AddAsync(newTrack);
                 await unitOfWork.SaveChanges();
 
@@ -166,19 +162,25 @@ public class Track : BaseEntity
     {
         var track = unitOfWork.GetRepository<Track>()
             .FirstOrDefault(x => x.Id == trackId);
-        var filePath = Path.Combine("wwwroot/Tracks", track.FileName);
-        if (System.IO.File.Exists(filePath))
+        if (track?.FileName != null)
         {
-            await using (var fileStream = new FileStream(filePath, FileMode.Open, FileAccess.Read))
+            var filePath = Path.Combine("wwwroot/Tracks", track.FileName);
+            if (System.IO.File.Exists(filePath))
             {
+                await using (var fileStream = new FileStream(filePath, FileMode.Open, FileAccess.Read))
+                {
+                }
+
+                await System.IO.File.WriteAllBytesAsync(filePath, await System.IO.File.ReadAllBytesAsync(filePath));
+                System.IO.File.Delete(filePath);
             }
-
-            await System.IO.File.WriteAllBytesAsync(filePath, await System.IO.File.ReadAllBytesAsync(filePath));
-            System.IO.File.Delete(filePath);
+            var playlistTracks = await unitOfWork.GetRepository<PlaylistTrack>()
+                .Where(x => x.TrackId == trackId)
+                .ToArrayAsync();
+            unitOfWork.GetRepository<PlaylistTrack>().DeleteRange(playlistTracks);
+            unitOfWork.GetRepository<Track>().Delete(track);
         }
-
-
-        if (track is not null) unitOfWork.GetRepository<Track>().Delete(track);
+        
         await unitOfWork.SaveChanges();
     }
 }

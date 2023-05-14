@@ -38,9 +38,9 @@ public class AlbumController : Controller
         album.Tracks = await _unitOfWork.GetRepository<Track>()
             .Where(x => x.AlbumId == albumId && x.UserId == user.Id)
             .Include(x => x.Artist)
-            .Include(x => x.Playlist)
             .ToListAsync();
         ViewBag.AlbumArtFileName = album.AlbumArtFileName;
+        ViewBag.AlbumName = album.Name;
 
         return View(album.Tracks.ToArray());
     }

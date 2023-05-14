@@ -14,4 +14,49 @@
 </form>
 <br>
 
-@await Html.PartialAsync("TrackTable", Model)
+<table class="table">
+    <thead>
+    <tr>
+        <th scope="col">Название</th>
+        <th scope="col">Трек</th>
+        <th scope="col">Исполнитель</th>
+        <th scope="col">Альбом</th>
+        <th scope="col"></th>
+        <th scope="col"></th>
+    </tr>
+    </thead>
+    <tbody>
+    @foreach (var track in Model)
+    {
+        <tr>
+            <td>@track.Name</td>
+            <td>
+                <audio controls>
+                    <source src="@Url.Content("~/Tracks/" + track.FileName)" type="audio/mpeg">
+                </audio>
+            </td>
+            <td>@track.Artist?.Name</td>
+            <td>@track.Album?.Name</td>
+            <td>
+                <form asp-controller="Track" asp-action="DeleteTrack" method="post">
+                    <input type="hidden" name="trackId" value="@track.Id"/>
+                    <button class="btn btn-danger" type="submit">Удалить</button>
+                </form>
+            </td>
+            <td>
+                <button type="button" class="btn btn-primary add-to-playlist-button"
+                        data-track-id="@track.Id" id="addToPlaylistModalBtn">
+                    Добавить в плейлист
+                </button>
+            </td>
+        </tr>
+    }
+    </tbody>
+</table>
+
+@await Html.PartialAsync("ListPlaylist")
+
+@section Scripts
+{
+    <script src="~/js/addToPlaylistModal.js"></script>
+}
