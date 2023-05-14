@@ -6,7 +6,7 @@
 }
 <h2>@Model.Name</h2>
 <div class="playlist-tile">
-    <img src="@Url.Content("~/PlaylistArt/" + Model.PlaylistArtFileName)" alt=""/>
+    <img src="@Url.Content("~/PlaylistArt/" + Model.PlaylistArtFileName)" onerror="setDefaultImage(this, 'Playlist.png')" alt=""/>
 </div>
 <br>
 <form asp-controller="Playlist" asp-action="EditPlaylist" method="post">
@@ -20,4 +20,36 @@
 </form>
 <br>
 
-@await Html.PartialAsync("TrackTable", Model.Tracks.ToArray())
+<table class="table">
+    <thead>
+    <tr>
+        <th scope="col">Название</th>
+        <th scope="col">Трек</th>
+        <th scope="col">Исполнитель</th>
+        <th scope="col">Альбом</th>
+        <th scope="col"></th>
+    </tr>
+    </thead>
+    <tbody>
+    @foreach (var track in Model.Tracks.ToArray())
+    {
+        <tr>
+            <td>@track.Name</td>
+            <td>
+                <audio controls>
+                    <source src="@Url.Content("~/Tracks/" + track.FileName)" type="audio/mpeg">
+                </audio>
+            </td>
+            <td>@track.Artist?.Name</td>
+            <td>@track.Album?.Name</td>
+            <td>
+                <form asp-controller="Playlist" asp-action="DeleteTrackFromPlaylist">
+                    <input type="hidden" name="trackId" value="@track.Id">
+                    <input type="hidden" name="playlistId" value="@Model.Id">
+                    <button type="submit" class="btn btn-danger">Удалить из плейлиста</button>
+                </form>
+            </td>
+        </tr>
+    }
+    </tbody>
+</table>

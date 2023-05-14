@@ -14,6 +14,15 @@
 </form>
 <br>
 
+<form asp-controller="Track" method="get" asp-action="GetFilteredTracks" enctype="multipart/form-data">
+    <div class="form-group">
+        <label for="searchText">Поиск</label>
+        <input class="form-control" type="text" name="searchText" id="searchText">
+    </div>
+</form>
+<br>
+
+
 <table class="table">
     <thead>
     <tr>
@@ -21,6 +30,7 @@
         <th scope="col">Трек</th>
         <th scope="col">Исполнитель</th>
         <th scope="col">Альбом</th>
+        <th scope="col">Жанры</th>
         <th scope="col"></th>
         <th scope="col"></th>
     </tr>
@@ -37,6 +47,7 @@
             </td>
             <td>@track.Artist?.Name</td>
             <td>@track.Album?.Name</td>
+            <td>@track.Genres</td>
             <td>
                 <form asp-controller="Track" asp-action="DeleteTrack" method="post">
                     <input type="hidden" name="trackId" value="@track.Id"/>

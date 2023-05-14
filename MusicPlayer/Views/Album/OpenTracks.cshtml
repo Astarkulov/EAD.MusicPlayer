@@ -6,7 +6,7 @@
 }
 <h2>@ViewBag.AlbumName</h2>
 <div class="album-tile">
-    <img src="@Url.Content("~/AlbumArt/" + @ViewBag.AlbumArtFileName)" alt=""/>
+    <img src="@Url.Content("~/AlbumArt/" + @ViewBag.AlbumArtFileName)" onerror="setDefaultImage(this, 'Album.png')" alt=""/>
 </div>
 
 <br>

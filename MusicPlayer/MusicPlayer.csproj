@@ -18,6 +18,8 @@
 
   <ItemGroup>
     <Folder Include="wwwroot\AlbumArt\" />
+    <Folder Include="wwwroot\ArtistArt\" />
+    <Folder Include="wwwroot\DefaultPictures\" />
     <Folder Include="wwwroot\PlaylistArt\" />
   </ItemGroup>
 

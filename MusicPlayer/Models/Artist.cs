@@ -19,6 +19,11 @@ public class Artist : BaseEntity
     public string Name { get; set; }
 
     /// <summary>
+    /// Название файла фотографии
+    /// </summary>
+    public string? ArtistArtFileName { get; set; }
+
+    /// <summary>
     /// Композиции
     /// </summary>
     public virtual IList<Track> Tracks { get; set; }

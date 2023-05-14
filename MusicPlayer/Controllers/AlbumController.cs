@@ -1,29 +1,25 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using MusicPlayer.Data;
-using MusicPlayer.Models;
+using MusicPlayer.Services.Interfaces;
 
 namespace MusicPlayer.Controllers;
 
 public class AlbumController : Controller
 {
     private readonly UserManager<IdentityUser> _userManager;
-    private readonly IUnitOfWork _unitOfWork;
+    private readonly IAlbumService _albumService;
 
     public AlbumController(UserManager<IdentityUser> userManager,
-        IUnitOfWork unitOfWork)
+        IAlbumService albumService)
     {
         _userManager = userManager;
-        _unitOfWork = unitOfWork;
+        _albumService = albumService;
     }
 
     public async Task<IActionResult> Index()
     {
         var user = await _userManager.GetUserAsync(User);
-        var albums = await _unitOfWork.GetRepository<Album>()
-            .Where(x => x.UserId == user.Id)
-            .ToArrayAsync();
+        var albums = await _albumService.GetAlbums(user);
 
         return View(albums);
     }
@@ -31,14 +27,10 @@ public class AlbumController : Controller
     public async Task<IActionResult> OpenTracks(long albumId)
     {
         var user = await _userManager.GetUserAsync(User);
-        var album = _unitOfWork.GetRepository<Album>()
-            .FirstOrDefault(x => x.UserId == user.Id && x.Id == albumId);
+        var album = await _albumService.GetAlbumById(albumId, user);
+
         if (album is null) return View();
-        
-        album.Tracks = await _unitOfWork.GetRepository<Track>()
-            .Where(x => x.AlbumId == albumId && x.UserId == user.Id)
-            .Include(x => x.Artist)
-            .ToListAsync();
+
         ViewBag.AlbumArtFileName = album.AlbumArtFileName;
         ViewBag.AlbumName = album.Name;
 

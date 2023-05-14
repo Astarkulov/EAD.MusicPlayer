@@ -1,31 +1,25 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using MusicPlayer.Data;
-using MusicPlayer.Dto;
-using MusicPlayer.Models;
-using MusicPlayer.ViewModels;
-using TagLib.Riff;
+using MusicPlayer.Services.Interfaces;
 
 namespace MusicPlayer.Controllers;
 
 public class PlaylistController : Controller
 {
-    private readonly IUnitOfWork _unitOfWork;
+    private readonly IPlaylistService _playlistService;
     private readonly UserManager<IdentityUser> _userManager;
 
-    public PlaylistController(IUnitOfWork unitOfWork, UserManager<IdentityUser> userManager)
+    public PlaylistController(IPlaylistService playlistService, UserManager<IdentityUser> userManager)
     {
-        _unitOfWork = unitOfWork;
+        _playlistService = playlistService;
         _userManager = userManager;
     }
 
     public async Task<IActionResult> Index()
     {
         var user = await _userManager.GetUserAsync(User);
-        var playlists = await _unitOfWork.GetRepository<Playlist>()
-            .Where(x => x.UserId == user.Id)
-            .ToArrayAsync();
+        var playlists = await _playlistService.GetAllPlaylists(user);
+
 
         return View(playlists);
     }
@@ -39,7 +33,7 @@ public class PlaylistController : Controller
     [HttpPost]
     public IActionResult EditPlaylist(long? playlistId)
     {
-        var playlist = _unitOfWork.GetRepository<Playlist>().FirstOrDefault(x => x.Id == playlistId);
+        var playlist = _playlistService.GetPlaylistById(playlistId);
         ViewBag.PlaylistId = playlistId;
         ViewBag.PlaylistName = playlist.Name;
         return View("AddPlaylist");
@@ -48,61 +42,22 @@ public class PlaylistController : Controller
     [HttpPost]
     public async Task<IActionResult> SavePlaylist(string playlistName, IFormFile imageFile, long? playlistId)
     {
-        var fileName = string.Empty;
-        if (imageFile is not null)
+        try
         {
-            if (!IsImageFile(imageFile.FileName))
-                ModelState.AddModelError("image", "Некорректный формат файла. Пожалуйста, выберите изображение.");
-            if (!ModelState.IsValid) return RedirectToAction("Index");
-            fileName = Path.GetFileName(imageFile.FileName);
-            var filePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "PlaylistArt", fileName);
-            await using var fileStream = new FileStream(filePath, FileMode.Create);
-            await imageFile.CopyToAsync(fileStream);
+            var user = await _userManager.GetUserAsync(User);
+            await _playlistService.SavePlaylist(playlistName, imageFile, playlistId, user);
         }
-
-        var user = await _userManager.GetUserAsync(User);
-        if (string.IsNullOrEmpty(playlistName)) return RedirectToAction("Index");
-        if (playlistId is not null)
+        catch (Exception e)
         {
-            var playlist = _unitOfWork.GetRepository<Playlist>()
-                .FirstOrDefault(x => x.Id == playlistId);
-            playlist.Name = playlistName;
-            playlist.PlaylistArtFileName = fileName == string.Empty ? playlist.PlaylistArtFileName : fileName;
-            _unitOfWork.GetRepository<Playlist>().Update(playlist);
+            return RedirectToAction("Index");
         }
-        else
-        {
-            _unitOfWork.GetRepository<Playlist>().Add(new Playlist
-            {
-                Name = playlistName,
-                UserId = user.Id,
-                PlaylistArtFileName = fileName
-            });
-        }
-        
-        await _unitOfWork.SaveChanges();
 
         return RedirectToAction("Index");
     }
 
     public async Task<IActionResult> OpenPlaylist(long? playlistId)
     {
-        var playlist = _unitOfWork
-            .GetRepository<Playlist>()
-            .Include(x => x.PlaylistTracks)
-            .FirstOrDefault(x => x.Id == playlistId);
-
-        var tracks = await _unitOfWork.GetRepository<Track>()
-            .Where(x => playlist.PlaylistTracks.Select(y => y.TrackId).Contains(x.Id))
-            .ToArrayAsync();
-
-        var playlistViewModel = new PlaylistViewModel
-        {
-            Name = playlist.Name,
-            Id = playlist.Id,
-            PlaylistArtFileName = playlist.PlaylistArtFileName,
-            Tracks = tracks
-        };
+        var playlistViewModel = await _playlistService.GetPlaylistTracks(playlistId);
 
         return View(playlistViewModel);
     }
@@ -111,22 +66,7 @@ public class PlaylistController : Controller
     public async Task<IActionResult> GetPlaylists(long? trackId)
     {
         var user = await _userManager.GetUserAsync(User);
-        
-        var checkedPlaylists = await _unitOfWork.GetRepository<PlaylistTrack>()
-            .Where(x => x.TrackId == trackId)
-            .Select(x => x.PlaylistId)
-            .ToArrayAsync();
-
-        var allPlaylists = await _unitOfWork.GetRepository<Playlist>()
-            .Where(x => x.UserId == user.Id)
-            .ToArrayAsync();
-
-        var playlists = allPlaylists
-            .Select(playlist => 
-                new PlaylistData
-                {
-                    Name = playlist.Name, Id = playlist.Id, CheckedPlaylist = checkedPlaylists.Contains(playlist.Id)
-                }).ToList();
+        var playlists = await _playlistService.GetPlaylistsForModal(trackId, user);
 
         return Ok(playlists);
     }
@@ -134,28 +74,15 @@ public class PlaylistController : Controller
     [HttpPost]
     public async Task<IActionResult> DeletePlaylist(long playlistId)
     {
-        var playlist = _unitOfWork.GetRepository<Playlist>()
-            .FirstOrDefault(x => x.Id == playlistId);
-
-        var playlistTracks = await _unitOfWork.GetRepository<PlaylistTrack>()
-            .Where(x => x.PlaylistId == playlistId)
-            .ToArrayAsync();
-        
-        if (playlist != null)
-        {
-            _unitOfWork.GetRepository<PlaylistTrack>().DeleteRange(playlistTracks);
-            _unitOfWork.GetRepository<Playlist>().Delete(playlist);
-        }
-
-        await _unitOfWork.SaveChanges();
+        await _playlistService.DeletePlaylist(playlistId);
 
         return RedirectToAction("Index");
     }
-    
-    private static bool IsImageFile(string fileName)
+
+    public async Task<IActionResult> DeleteTrackFromPlaylist(long? trackId, long playlistId)
     {
-        var extension = Path.GetExtension(fileName);
-        return !string.IsNullOrEmpty(extension) && (extension.ToLower() == ".jpg" || extension.ToLower() == ".jpeg" ||
-                                                    extension.ToLower() == ".png" || extension.ToLower() == ".gif");
+        await _playlistService.DeletePlaylistFromPlaylist(trackId, playlistId);
+
+        return RedirectToAction("OpenPlaylist", new { playlistId });
     }
 }

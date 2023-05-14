@@ -19,7 +19,7 @@
     {
         <div class="playlist-tile">
             <a href="@Url.Action("OpenPlaylist", new { playlistId = playlist.Id })">
-                <img src="@Url.Content("~/PlaylistArt/" + playlist.PlaylistArtFileName)" alt=""/>
+                <img src="@Url.Content("~/PlaylistArt/" + playlist.PlaylistArtFileName)" onerror="setDefaultImage(this, 'Playlist.png')" alt=""/>
                 <div class="playlist-title">@playlist.Name</div>
             </a>
         </div>

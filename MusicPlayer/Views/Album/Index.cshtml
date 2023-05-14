@@ -12,7 +12,7 @@
     {
         <div class="album-tile">
             <a href="@Url.Action("OpenTracks", new { albumId = album.Id })">
-                <img src="@Url.Content("~/AlbumArt/" + album.AlbumArtFileName)" alt=""/>
+                <img src="@Url.Content("~/AlbumArt/" + album.AlbumArtFileName)" onerror="setDefaultImage(this, 'Album.png')" alt=""/>
                 <div class="album-title">@album.Name</div>
             </a>
         </div>
