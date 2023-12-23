@@ -1,0 +1,20 @@
+﻿@model Album[]
+@{
+    Layout = "_Layout";
+}
+
+<div class="text-center">
+    <h1 class="display-4">Мои Альбомы</h1>
+</div>
+
+<div class="album-grid">
+    @foreach (var album in Model)
+    {
+        <div class="album-tile">
+            <a href="@Url.Action("OpenTracks", new { albumId = album.Id })">
+                <img src="@Url.Content("~/AlbumArt/" + album.AlbumArtFileName)" onerror="setDefaultImage(this, 'Album.png')" alt=""/>
+                <div class="album-title">@album.Name</div>
+            </a>
+        </div>
+    }
+</div>

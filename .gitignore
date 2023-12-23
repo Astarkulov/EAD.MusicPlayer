@@ -6,3 +6,8 @@ MusicPlayer/wwwroot/AlbumArt/*
 MusicPlayer/wwwroot/Tracks/*
 MusicPlayer/wwwroot/PlaylistArt/*
 MusicPlayer/wwwroot/ArtistArt/*
+bin
+obj
+*.jpg
+*.jpeg
+*.png

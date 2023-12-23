@@ -1,0 +1,14 @@
+﻿@model Track[]
+@{
+    ViewBag.Title = "Исполнитель";
+    Layout = "_Layout";
+}
+
+<h2>@ViewBag.ArtistName</h2>
+<div class="artist-tile">
+    <img src="@Url.Content("~/ArtistArt/" + @ViewBag.ArtistArtFileName)" onerror="setDefaultImage(this, 'Artist.png')" alt=""/>
+</div>
+
+<br>
+
+@await Html.PartialAsync("TrackTable", Model)

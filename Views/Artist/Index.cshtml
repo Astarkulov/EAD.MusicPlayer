@@ -1,0 +1,22 @@
+﻿@model Artist[]
+@{
+    ViewBag.Title = "Исполнители";
+    Layout = "_Layout";
+}
+
+<div class="text-center">
+    <h1 class="display-4">Мои исполнители</h1>
+</div>
+
+<div class="artist-grid">
+    @foreach (var artist in Model)
+    {
+        <div class="artist-tile">
+            <a href="@Url.Action("OpenArtist", new { artistId = artist.Id })">
+                <img src="@Url.Content("~/AlbumArt/" + artist.ArtistArtFileName)" onerror="setDefaultImage(this, 'Artist.png')" alt=""/>
+                <div class="artist-title">@artist.Name</div>
+            </a>
+        </div>
+    }
+</div>
+

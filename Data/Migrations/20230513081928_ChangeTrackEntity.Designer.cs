@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using MusicPlayer.Data;
 
@@ -11,9 +12,10 @@ using MusicPlayer.Data;
 namespace MusicPlayer.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20230513081928_ChangeTrackEntity")]
+    partial class ChangeTrackEntity
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -232,19 +234,22 @@ namespace MusicPlayer.Data.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long?>("Id"), 1L, 1);
 
-                    b.Property<string>("AlbumArtFileName")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<long?>("ArtistId")
+                    b.Property<long>("ArtistId")
                         .HasColumnType("bigint");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
                     b.HasKey("Id");
 
                     b.HasIndex("ArtistId");
+
+                    b.HasIndex("UserId");
 
                     b.ToTable("Albums");
                 });
@@ -257,14 +262,17 @@ namespace MusicPlayer.Data.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long?>("Id"), 1L, 1);
 
-                    b.Property<string>("ArtistArtFileName")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("UserId");
 
                     b.ToTable("Artists");
                 });
@@ -281,10 +289,6 @@ namespace MusicPlayer.Data.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("PlaylistArtFileName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("UserId")
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
@@ -294,21 +298,6 @@ namespace MusicPlayer.Data.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("Playlists");
-                });
-
-            modelBuilder.Entity("MusicPlayer.Models.PlaylistTrack", b =>
-                {
-                    b.Property<long?>("TrackId")
-                        .HasColumnType("bigint");
-
-                    b.Property<long?>("PlaylistId")
-                        .HasColumnType("bigint");
-
-                    b.HasKey("TrackId", "PlaylistId");
-
-                    b.HasIndex("PlaylistId");
-
-                    b.ToTable("PlaylistTracks");
                 });
 
             modelBuilder.Entity("MusicPlayer.Models.Track", b =>
@@ -329,10 +318,6 @@ namespace MusicPlayer.Data.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Genres")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<double>("Length")
                         .HasColumnType("float");
 
@@ -341,11 +326,22 @@ namespace MusicPlayer.Data.Migrations
                         .HasMaxLength(300)
                         .HasColumnType("nvarchar(300)");
 
+                    b.Property<long?>("PlaylistId")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
                     b.HasKey("Id");
 
                     b.HasIndex("AlbumId");
 
                     b.HasIndex("ArtistId");
+
+                    b.HasIndex("PlaylistId");
+
+                    b.HasIndex("UserId");
 
                     b.ToTable("Tracks");
                 });
@@ -406,9 +402,29 @@ namespace MusicPlayer.Data.Migrations
                     b.HasOne("MusicPlayer.Models.Artist", "Artist")
                         .WithMany("Albums")
                         .HasForeignKey("ArtistId")
-                        .OnDelete(DeleteBehavior.NoAction);
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityUser", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Artist");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("MusicPlayer.Models.Artist", b =>
+                {
+                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityUser", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("MusicPlayer.Models.Playlist", b =>
@@ -422,25 +438,6 @@ namespace MusicPlayer.Data.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("MusicPlayer.Models.PlaylistTrack", b =>
-                {
-                    b.HasOne("MusicPlayer.Models.Playlist", "Playlist")
-                        .WithMany("PlaylistTracks")
-                        .HasForeignKey("PlaylistId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("MusicPlayer.Models.Track", "Track")
-                        .WithMany("PlaylistTracks")
-                        .HasForeignKey("TrackId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Playlist");
-
-                    b.Navigation("Track");
-                });
-
             modelBuilder.Entity("MusicPlayer.Models.Track", b =>
                 {
                     b.HasOne("MusicPlayer.Models.Album", "Album")
@@ -451,9 +448,23 @@ namespace MusicPlayer.Data.Migrations
                         .WithMany("Tracks")
                         .HasForeignKey("ArtistId");
 
+                    b.HasOne("MusicPlayer.Models.Playlist", "Playlist")
+                        .WithMany("Tracks")
+                        .HasForeignKey("PlaylistId");
+
+                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityUser", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.Navigation("Album");
 
                     b.Navigation("Artist");
+
+                    b.Navigation("Playlist");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("MusicPlayer.Models.Album", b =>
@@ -470,12 +481,7 @@ namespace MusicPlayer.Data.Migrations
 
             modelBuilder.Entity("MusicPlayer.Models.Playlist", b =>
                 {
-                    b.Navigation("PlaylistTracks");
-                });
-
-            modelBuilder.Entity("MusicPlayer.Models.Track", b =>
-                {
-                    b.Navigation("PlaylistTracks");
+                    b.Navigation("Tracks");
                 });
 #pragma warning restore 612, 618
         }

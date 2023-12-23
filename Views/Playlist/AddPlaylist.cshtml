@@ -1,0 +1,18 @@
+﻿@{
+    ViewBag.Title = "Добавить плейлист";
+    Layout = "_Layout";
+}
+
+<h2>Добавить/Изменить плейлист</h2>
+<form asp-controller="Playlist" method="post" asp-action="SavePlaylist" enctype="multipart/form-data">
+    <div class="form-group">
+        <label for="playlistName">Наименование</label>
+        <input class="form-control" type="text" name="playlistName" id="playlistName" value="@ViewBag.PlaylistName">
+        <br>
+        <label for="imageFile">Выберите изображение для плейлиста</label>
+        <input class="btn btn-dark" type="file" name="imageFile" id="imageFile">
+        <br>
+        <input type="hidden" name="playlistId" value="@ViewBag.PlaylistId">
+        <input class="btn btn-primary" type="submit" value="Сохранить"/>
+    </div>
+</form>
